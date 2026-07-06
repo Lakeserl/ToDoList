@@ -1,0 +1,67 @@
+<div class="modal-overlay" (click)="onCancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ todo() ? 'Cập nhật công việc' : 'Công việc mới' }}</h2>
+      <button class="close-btn" (click)="onCancel()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="form-body">
+      <div class="form-group">
+        <label for="title">Tiêu đề <span class="required">*</span></label>
+        <input
+          id="title"
+          type="text"
+          [value]="title()"
+          (input)="onTitleInput($any($event.target).value)"
+          placeholder="Cần làm gì?"
+          [class.error]="titleError()"
+          autofocus
+        />
+        @if (titleError()) {
+          <span class="error-text">{{ titleError() }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="description">Mô tả</label>
+        <textarea
+          id="description"
+          [value]="description()"
+          (input)="description.set($any($event.target).value)"
+          placeholder="Thêm chi tiết..."
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="priority">Độ ưu tiên</label>
+        <div class="priority-selector">
+          @for (p of priorities; track p) {
+            <button
+              type="button"
+              class="priority-btn"
+              [class.active]="priority() === p"
+              [class.low]="p === 'LOW'"
+              [class.medium]="p === 'MEDIUM'"
+              [class.high]="p === 'HIGH'"
+              (click)="priority.set(p)"
+            >
+              {{ p === 'LOW' ? 'THẤP' : p === 'MEDIUM' ? 'TRUNG BÌNH' : 'CAO' }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">Hủy</button>
+        <button type="submit" class="btn btn-primary">
+          {{ todo() ? 'Lưu' : 'Thêm mới' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

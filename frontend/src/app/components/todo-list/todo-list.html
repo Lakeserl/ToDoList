@@ -1,0 +1,175 @@
+<div class="container">
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+          </svg>
+          Danh sách công việc
+        </h1>
+        <span class="counter">{{ totalElements() }} công việc</span>
+      </div>
+      <button class="add-btn" (click)="openCreateForm()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Thêm ToDo 
+      </button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Tìm kiếm công việc..."
+        [value]="searchKeyword()"
+        (input)="onSearch($any($event.target).value)"
+      />
+    </div>
+
+    <div class="filters">
+      <button
+        class="filter-btn"
+        [class.active]="activeFilter() === null"
+        (click)="onFilterChange(null)"
+      >Tất cả</button>
+      <button
+        class="filter-btn"
+        [class.active]="activeFilter() === false"
+        (click)="onFilterChange(false)"
+      >Chưa hoàn thành</button>
+      <button
+        class="filter-btn"
+        [class.active]="activeFilter() === true"
+        (click)="onFilterChange(true)"
+      >Đã hoàn thành</button>
+    </div>
+
+    <select class="sort-select" [value]="sortField()" (change)="onSortChange($any($event.target).value)">
+      <option value="createdAt,desc">Mới nhất</option>
+      <option value="createdAt,asc">Cũ nhất</option>
+      <option value="priority,desc">Độ ưu tiên: Cao → Thấp</option>
+      <option value="priority,asc">Độ ưu tiên: Thấp → Cao</option>
+      <option value="title,asc">Tiêu đề: A → Z</option>
+      <option value="title,desc">Tiêu đề: Z → A</option>
+    </select>
+  </div>
+
+  <div class="todo-container">
+    @if (loading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Đang tải...</p>
+      </div>
+    } @else if (todos().length === 0) {
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <path d="M9 11l3 3L22 4" opacity="0.3"/>
+        </svg>
+        <h3>Không tìm thấy công việc nào</h3>
+        <p>
+          @if (searchKeyword() || activeFilter() !== null) {
+            Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+          } @else {
+            Hãy tạo công việc đầu tiên để bắt đầu!
+          }
+        </p>
+        @if (!searchKeyword() && activeFilter() === null) {
+          <button class="add-btn-empty" (click)="openCreateForm()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Tạo công việc
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="todo-list">
+        @for (todo of todos(); track todo.id) {
+          <app-todo-item
+            [todo]="todo"
+            (toggle)="onToggle($event)"
+            (edit)="openEditForm($event)"
+            (delete)="confirmDelete($event)"
+          />
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button
+            class="page-btn"
+            [disabled]="isFirst()"
+            (click)="goToPage(currentPage() - 1)"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+
+          @for (page of getPageNumbers(); track page) {
+            <button
+              class="page-btn"
+              [class.active]="page === currentPage()"
+              (click)="goToPage(page)"
+            >{{ page + 1 }}</button>
+          }
+
+          <button
+            class="page-btn"
+            [disabled]="isLast()"
+            (click)="goToPage(currentPage() + 1)"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+@if (showForm()) {
+  <app-todo-form
+    [todo]="editingTodo()"
+    (save)="onSave($event)"
+    (cancel)="closeForm()"
+  />
+}
+
+@if (deleteTargetId() !== null) {
+  <app-confirm-dialog
+    message="Bạn có chắc chắn muốn xóa công việc này không? Hành động này không thể hoàn tác."
+    (confirm)="executeDelete()"
+    (cancel)="cancelDelete()"
+  />
+}
+
+@if (toast(); as t) {
+  <div class="toast" [class.success]="t.type === 'success'" [class.error]="t.type === 'error'">
+    @if (t.type === 'success') {
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    } @else {
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+    }
+    {{ t.message }}
+  </div>
+}

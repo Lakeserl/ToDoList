@@ -1,0 +1,16 @@
+<div class="modal-overlay" (click)="onCancel()">
+  <div class="dialog" (click)="$event.stopPropagation()">
+    <div class="dialog-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <p class="dialog-message">{{ message() }}</p>
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" (click)="onCancel()">Hủy</button>
+      <button class="btn btn-danger" (click)="onConfirm()">Xóa</button>
+    </div>
+  </div>
+</div>

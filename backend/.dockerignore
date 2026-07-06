@@ -1,0 +1,14 @@
+target/
+*.iml
+*.iws
+*.ipr
+.idea/
+.settings/
+.classpath
+.project
+.factorypath
+.vscode/
+todo-frontend/
+skills/
+.gemini/
+.git/
